@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Allows cleartext (http://) traffic to the local dev server's LAN IP only.
+  This is a development-only setting for talking to the Next.js dev server
+  over plain HTTP on the local network; production must use HTTPS and this
+  file should be tightened (or removed, defaulting to HTTPS-only) before a
+  release build is ever distributed.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">192.168.0.48</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>
