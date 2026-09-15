@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/contribution_type.dart';
 import '../models/donation.dart';
-import '../models/org_totals.dart';
 import '../models/payment.dart';
 import '../services/member_service.dart';
 import 'core_providers.dart';
@@ -21,8 +20,4 @@ final myPaymentsProvider = FutureProvider.autoDispose<List<Payment>>((ref) {
 
 final myDonationsProvider = FutureProvider.autoDispose<List<Donation>>((ref) {
   return ref.watch(memberServiceProvider).fetchMyDonations();
-});
-
-final orgTotalsProvider = FutureProvider.autoDispose<OrgTotals>((ref) {
-  return ref.watch(memberServiceProvider).fetchOrgTotals();
 });

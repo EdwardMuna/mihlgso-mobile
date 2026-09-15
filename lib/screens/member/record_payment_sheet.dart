@@ -8,11 +8,7 @@ import '../../providers/member_providers.dart';
 import '../../widgets/state_views.dart';
 
 class RecordPaymentSheet extends ConsumerStatefulWidget {
-  const RecordPaymentSheet({super.key, this.initialContributionTypeId});
-
-  /// Pre-selects a contribution type (e.g. tapping an unpaid dues card on
-  /// the dashboard) instead of leaving the dropdown empty.
-  final int? initialContributionTypeId;
+  const RecordPaymentSheet({super.key});
 
   @override
   ConsumerState<RecordPaymentSheet> createState() => _RecordPaymentSheetState();
@@ -27,14 +23,7 @@ class _RecordPaymentSheetState extends ConsumerState<RecordPaymentSheet> {
   String _paymentName = '';
   DateTime _paymentDate = DateTime.now();
   bool _submitting = false;
-  bool _prefilled = false;
   String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _contributionTypeId = widget.initialContributionTypeId;
-  }
 
   @override
   void dispose() {
@@ -94,14 +83,6 @@ class _RecordPaymentSheetState extends ConsumerState<RecordPaymentSheet> {
                       onRetry: () => ref.invalidate(contributionTypesProvider),
                     ),
                     data: (types) {
-                      if (!_prefilled && _contributionTypeId != null) {
-                        final preselected = types.where((t) => t.id == _contributionTypeId);
-                        if (preselected.isNotEmpty) {
-                          _amountDue = preselected.first.amount;
-                          _paymentName = preselected.first.name;
-                        }
-                        _prefilled = true;
-                      }
                       return DropdownButtonFormField<int>(
                         initialValue: _contributionTypeId,
                         decoration: InputDecoration(labelText: strings.contributionType),

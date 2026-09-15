@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import '../core/network/api_client.dart';
 import '../models/contribution_type.dart';
 import '../models/donation.dart';
-import '../models/org_totals.dart';
 import '../models/payment.dart';
 import '../models/user.dart';
 
@@ -65,14 +64,6 @@ class MemberService {
     return list
         .map((e) => ContributionType.fromJson(e as Map<String, dynamic>))
         .toList();
-  }
-
-  /// GET /api/org-totals — org-wide totalPaid/totalDonated, the same figures
-  /// shown on the admin dashboard, for the member dashboard's transparency
-  /// cards.
-  Future<OrgTotals> fetchOrgTotals() async {
-    final json = await _client.get('/org-totals');
-    return OrgTotals.fromJson(json);
   }
 
   Future<List<Payment>> fetchMyPayments() async {

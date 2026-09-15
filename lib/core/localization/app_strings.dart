@@ -123,6 +123,8 @@ class AppStrings {
     'pendingApplications': 'Pending Applications',
     'pendingApprovals': 'Pending Approvals',
     'totalDonated': 'Total Donated',
+    'totalContributed': 'Total contributed',
+    'totalContributedAndDonated': 'Overall Total',
     // Apply screen
     'applyForMembership': 'Apply for Membership',
     'applicationSubmittedMessage': 'Application submitted! We will review it and email you the outcome.',
@@ -286,7 +288,6 @@ class AppStrings {
     'paidStatus': 'Paid',
     'partiallyPaidStatus': 'Partially paid',
     'notPaidStatus': 'Not paid',
-    'alreadyPaidInFull': 'Already paid in full.',
     'dateRange': 'Date range',
     'clearDateRange': 'Clear date range',
     'editPaymentTitle': 'Edit Payment',
@@ -525,6 +526,8 @@ class AppStrings {
     'pendingApplications': 'Maombi Yanayosubiri',
     'pendingApprovals': 'Idhini Zinazosubiri',
     'totalDonated': 'Jumla Iliyochangwa',
+    'totalContributed': 'Jumla iliyochangiwa',
+    'totalContributedAndDonated': 'Jumla Kuu',
     // Apply screen
     'applyForMembership': 'Omba Uanachama',
     'applicationSubmittedMessage': 'Ombi limewasilishwa! Tutalipitia na kukutumia matokeo kwa barua pepe.',
@@ -688,7 +691,6 @@ class AppStrings {
     'paidStatus': 'Imelipwa',
     'partiallyPaidStatus': 'Imelipwa Kiasi',
     'notPaidStatus': 'Haijalipwa',
-    'alreadyPaidInFull': 'Tayari umelipa kikamilifu.',
     'dateRange': 'Muda wa Tarehe',
     'clearDateRange': 'Futa Muda wa Tarehe',
     'editPaymentTitle': 'Hariri Malipo',
@@ -936,6 +938,8 @@ class AppStrings {
   String get pendingApplications => _values['pendingApplications']!;
   String get pendingApprovals => _values['pendingApprovals']!;
   String get totalDonated => _values['totalDonated']!;
+  String get totalContributed => _values['totalContributed']!;
+  String get totalContributedAndDonated => _values['totalContributedAndDonated']!;
 
   // Apply screen
   String get applyForMembership => _values['applyForMembership']!;
@@ -1135,7 +1139,6 @@ class AppStrings {
   String get paidStatus => _values['paidStatus']!;
   String get partiallyPaidStatus => _values['partiallyPaidStatus']!;
   String get notPaidStatus => _values['notPaidStatus']!;
-  String get alreadyPaidInFull => _values['alreadyPaidInFull']!;
   String get dateRange => _values['dateRange']!;
   String get clearDateRange => _values['clearDateRange']!;
   String get editPaymentTitle => _values['editPaymentTitle']!;
