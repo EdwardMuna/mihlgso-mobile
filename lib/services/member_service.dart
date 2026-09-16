@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 
 import '../core/network/api_client.dart';
+import '../models/annual_subscription.dart';
 import '../models/contribution_type.dart';
 import '../models/donation.dart';
+import '../models/leaderboard.dart';
 import '../models/payment.dart';
 import '../models/user.dart';
 
@@ -56,6 +58,33 @@ class MemberService {
       'currentPassword': currentPassword,
       'newPassword': newPassword,
     });
+  }
+
+  /// GET /api/me/annual-subscription — null if no "annual subscription"
+  /// contribution type exists on the backend yet.
+  Future<AnnualSubscription?> fetchAnnualSubscription() async {
+    final json = await _client.get('/me/annual-subscription');
+    final data = json['annualSubscription'] as Map<String, dynamic>?;
+    return data == null ? null : AnnualSubscription.fromJson(data);
+  }
+
+  /// GET /api/leaderboards/contributors — same data as the website's
+  /// "Top Contributors" table, or the full "All Contributors" list when
+  /// [all] is true.
+  Future<LeaderboardResult> fetchTopContributors({int limit = 10, bool all = false}) async {
+    final json = await _client.get('/leaderboards/contributors', query: all ? {'all': 1} : {'limit': limit});
+    return LeaderboardResult.fromJson(json);
+  }
+
+  /// GET /api/leaderboards/donors — same data as the website's "Top Donors"
+  /// table, or the full "All Donors" list when [all] is true. [generalLabel]
+  /// is the fallback project name shown for donations with no purpose set.
+  Future<LeaderboardResult> fetchTopDonors({int limit = 10, bool all = false, required String generalLabel}) async {
+    final json = await _client.get('/leaderboards/donors', query: {
+      if (all) 'all': 1 else 'limit': limit,
+      'generalLabel': generalLabel,
+    });
+    return LeaderboardResult.fromJson(json);
   }
 
   Future<List<ContributionType>> fetchContributionTypes() async {

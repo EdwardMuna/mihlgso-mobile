@@ -123,8 +123,15 @@ class AppStrings {
     'pendingApplications': 'Pending Applications',
     'pendingApprovals': 'Pending Approvals',
     'totalDonated': 'Total Donated',
-    'totalContributed': 'Total contributed',
-    'totalContributedAndDonated': 'Overall Total',
+    'totalContributed': 'My Total Contributed',
+    'totalContributedAndDonated': 'My Overall Total',
+    'myTotalDonated': 'My Total Donated',
+    'annualSubscriptionMandatory': 'It must be paid (not optional)',
+    'topContributorsTitle': 'Top 10 Contributors',
+    'topDonorsTitle': 'Top 10 Donors',
+    'generalProject': 'General',
+    'overallTotalLabel': 'Overall total',
+    'leaderboardEmpty': 'No approved records yet.',
     // Apply screen
     'applyForMembership': 'Apply for Membership',
     'applicationSubmittedMessage': 'Application submitted! We will review it and email you the outcome.',
@@ -526,8 +533,15 @@ class AppStrings {
     'pendingApplications': 'Maombi Yanayosubiri',
     'pendingApprovals': 'Idhini Zinazosubiri',
     'totalDonated': 'Jumla Iliyochangwa',
-    'totalContributed': 'Jumla iliyochangiwa',
-    'totalContributedAndDonated': 'Jumla Kuu',
+    'totalContributed': 'Jumla Yangu Iliyochangiwa',
+    'totalContributedAndDonated': 'Jumla Yangu Kuu',
+    'myTotalDonated': 'Jumla Yangu ya Mchango wa Hiari',
+    'annualSubscriptionMandatory': 'Ni lazima ilipwe (si hiari)',
+    'topContributorsTitle': 'Wachangiaji 10 Bora',
+    'topDonorsTitle': 'Wafadhili 10 Bora',
+    'generalProject': 'Jumla',
+    'overallTotalLabel': 'Jumla kuu',
+    'leaderboardEmpty': 'Hakuna rekodi zilizoidhinishwa bado.',
     // Apply screen
     'applyForMembership': 'Omba Uanachama',
     'applicationSubmittedMessage': 'Ombi limewasilishwa! Tutalipitia na kukutumia matokeo kwa barua pepe.',
@@ -940,6 +954,16 @@ class AppStrings {
   String get totalDonated => _values['totalDonated']!;
   String get totalContributed => _values['totalContributed']!;
   String get totalContributedAndDonated => _values['totalContributedAndDonated']!;
+  String get myTotalDonated => _values['myTotalDonated']!;
+  String get annualSubscriptionMandatory => _values['annualSubscriptionMandatory']!;
+  String get topContributorsTitle => _values['topContributorsTitle']!;
+  String get topDonorsTitle => _values['topDonorsTitle']!;
+  String get generalProject => _values['generalProject']!;
+  String get overallTotalLabel => _values['overallTotalLabel']!;
+  String get leaderboardEmpty => _values['leaderboardEmpty']!;
+
+  String annualSubscriptionBadge(int year) =>
+      _isSwahili ? 'Ada Yangu ya Mwaka $year' : 'My Annual Subscription $year';
 
   // Apply screen
   String get applyForMembership => _values['applyForMembership']!;
