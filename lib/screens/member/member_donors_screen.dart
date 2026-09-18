@@ -20,7 +20,7 @@ class MemberDonorsScreen extends ConsumerWidget {
     final currency = NumberFormat.currency(locale: 'en_TZ', symbol: 'TSh ', decimalDigits: 0);
 
     return Scaffold(
-      appBar: AppBar(title: Text(strings.topDonorsTitle)),
+      appBar: AppBar(title: Text(strings.topDonorsAppBarTitle)),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(allDonorsProvider(strings.generalProject)),
         child: resultAsync.when(

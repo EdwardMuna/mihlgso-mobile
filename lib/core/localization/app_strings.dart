@@ -129,6 +129,8 @@ class AppStrings {
     'annualSubscriptionMandatory': 'It must be paid (not optional)',
     'topContributorsTitle': 'Top 10 Contributors',
     'topDonorsTitle': 'Top 10 Donors',
+    'topContributorsAppBarTitle': 'Top Contributors',
+    'topDonorsAppBarTitle': 'Top Donors',
     'generalProject': 'General',
     'overallTotalLabel': 'Overall total',
     'leaderboardEmpty': 'No approved records yet.',
@@ -539,6 +541,8 @@ class AppStrings {
     'annualSubscriptionMandatory': 'Ni lazima ilipwe (si hiari)',
     'topContributorsTitle': 'Wachangiaji 10 Bora',
     'topDonorsTitle': 'Wafadhili 10 Bora',
+    'topContributorsAppBarTitle': 'Wachangiaji Bora',
+    'topDonorsAppBarTitle': 'Wafadhili Bora',
     'generalProject': 'Jumla',
     'overallTotalLabel': 'Jumla kuu',
     'leaderboardEmpty': 'Hakuna rekodi zilizoidhinishwa bado.',
@@ -958,6 +962,8 @@ class AppStrings {
   String get annualSubscriptionMandatory => _values['annualSubscriptionMandatory']!;
   String get topContributorsTitle => _values['topContributorsTitle']!;
   String get topDonorsTitle => _values['topDonorsTitle']!;
+  String get topContributorsAppBarTitle => _values['topContributorsAppBarTitle']!;
+  String get topDonorsAppBarTitle => _values['topDonorsAppBarTitle']!;
   String get generalProject => _values['generalProject']!;
   String get overallTotalLabel => _values['overallTotalLabel']!;
   String get leaderboardEmpty => _values['leaderboardEmpty']!;

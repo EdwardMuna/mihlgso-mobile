@@ -20,7 +20,7 @@ class MemberContributorsScreen extends ConsumerWidget {
     final currency = NumberFormat.currency(locale: 'en_TZ', symbol: 'TSh ', decimalDigits: 0);
 
     return Scaffold(
-      appBar: AppBar(title: Text(strings.topContributorsTitle)),
+      appBar: AppBar(title: Text(strings.topContributorsAppBarTitle)),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(allContributorsProvider),
         child: resultAsync.when(
