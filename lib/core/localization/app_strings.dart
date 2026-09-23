@@ -238,6 +238,12 @@ class AppStrings {
     'copiedToClipboard': 'Copied to clipboard',
     'noPendingApplications': 'No pending applications.',
     'applicationDetails': 'Application details',
+    'exportExcelTooltip': 'Export to Excel',
+    'exportPdfTooltip': 'Export to PDF',
+    'exportCsvTooltip': 'Export to CSV',
+    'exportedFileTitlePayments': 'MIHLGSO Payments',
+    'exportedFileTitleDonations': 'MIHLGSO Donations',
+    'exportedFileTitleApplications': 'MIHLGSO Applications',
     // Admin: members
     'addMember': 'Add Member',
     'addMemberTooltip': 'Add Member',
@@ -649,6 +655,12 @@ class AppStrings {
     'copiedToClipboard': 'Imenakiliwa',
     'noPendingApplications': 'Hakuna maombi yanayosubiri.',
     'applicationDetails': 'Maelezo ya Ombi',
+    'exportExcelTooltip': 'Hamisha kwenda Excel',
+    'exportPdfTooltip': 'Hamisha kwenda PDF',
+    'exportCsvTooltip': 'Hamisha kwenda CSV',
+    'exportedFileTitlePayments': 'Malipo ya MIHLGSO',
+    'exportedFileTitleDonations': 'Michango ya MIHLGSO',
+    'exportedFileTitleApplications': 'Maombi ya MIHLGSO',
     // Admin: members
     'addMember': 'Ongeza Mwanachama',
     'addMemberTooltip': 'Ongeza Mwanachama',
@@ -1107,6 +1119,12 @@ class AppStrings {
   String get copiedToClipboard => _values['copiedToClipboard']!;
   String get noPendingApplications => _values['noPendingApplications']!;
   String get applicationDetails => _values['applicationDetails']!;
+  String get exportExcelTooltip => _values['exportExcelTooltip']!;
+  String get exportPdfTooltip => _values['exportPdfTooltip']!;
+  String get exportCsvTooltip => _values['exportCsvTooltip']!;
+  String get exportedFileTitlePayments => _values['exportedFileTitlePayments']!;
+  String get exportedFileTitleDonations => _values['exportedFileTitleDonations']!;
+  String get exportedFileTitleApplications => _values['exportedFileTitleApplications']!;
 
   // Admin: members
   String get addMember => _values['addMember']!;

@@ -6,8 +6,11 @@ import 'package:intl/intl.dart';
 import '../../core/localization/app_strings.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/theme/app_theme.dart';
+import '../../models/member_application.dart';
 import '../../providers/admin_providers.dart';
+import '../../services/export_service.dart';
 import '../../widgets/admin_card_shell.dart';
+import '../../widgets/export_buttons.dart';
 import '../../widgets/fade_slide_in.dart';
 import '../../widgets/state_views.dart';
 import 'member_detail_screen.dart' show memberAvatarImage;
@@ -96,6 +99,32 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
     }
   }
 
+  List<List<String>> _exportRows(List<MemberApplicationSummary> apps, DateFormat dateFmt) {
+    return apps
+        .map((a) => [
+              a.name,
+              a.email,
+              a.phone,
+              a.registrationType,
+              a.institution ?? '',
+              a.employmentStatus ?? '',
+              a.levelOfEducation ?? '',
+              a.status.name,
+              dateFmt.format(a.createdAt),
+            ])
+        .toList();
+  }
+
+  Future<void> _export(BuildContext context, Future<void> Function() run) async {
+    try {
+      await run();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
@@ -118,8 +147,34 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
             }
             return ListView.builder(
               padding: const EdgeInsets.all(12),
-              itemCount: apps.length,
-              itemBuilder: (context, i) {
+              itemCount: apps.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: ExportButtonsRow(
+                      onExcel: () => _export(context, () => ExportService.exportExcel(
+                            filename: 'mihlgso_applications',
+                            title: strings.exportedFileTitleApplications,
+                            headers: const ['Name', 'Email', 'Phone', 'Type', 'Institution', 'Employment', 'Education', 'Status', 'Submitted'],
+                            rows: _exportRows(apps, dateFmt),
+                          )),
+                      onPdf: () => _export(context, () => ExportService.exportPdf(
+                            filename: 'mihlgso_applications',
+                            title: strings.exportedFileTitleApplications,
+                            headers: const ['Name', 'Email', 'Phone', 'Type', 'Institution', 'Employment', 'Education', 'Status', 'Submitted'],
+                            rows: _exportRows(apps, dateFmt),
+                          )),
+                      onCsv: () => _export(context, () => ExportService.exportCsv(
+                            filename: 'mihlgso_applications',
+                            title: strings.exportedFileTitleApplications,
+                            headers: const ['Name', 'Email', 'Phone', 'Type', 'Institution', 'Employment', 'Education', 'Status', 'Submitted'],
+                            rows: _exportRows(apps, dateFmt),
+                          )),
+                    ),
+                  );
+                }
+                final i = index - 1;
                 final a = apps[i];
                 final isMember = a.registrationType == 'MEMBER';
                 return FadeSlideIn(

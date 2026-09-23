@@ -8,7 +8,9 @@ import '../../core/theme/app_theme.dart';
 import '../../models/donation.dart';
 import '../../models/payment.dart' show ApprovalStatus;
 import '../../providers/admin_providers.dart';
+import '../../services/export_service.dart';
 import '../../widgets/admin_card_shell.dart';
+import '../../widgets/export_buttons.dart';
 import '../../widgets/fade_slide_in.dart';
 import '../../widgets/state_views.dart';
 
@@ -142,6 +144,31 @@ class _AdminDonationsScreenState extends ConsumerState<AdminDonationsScreen> {
       }
       return true;
     }).toList();
+  }
+
+  List<List<String>> _exportRows(List<Donation> donations, NumberFormat currency, DateFormat dateFmt) {
+    return donations
+        .map((d) => [
+              d.donorName,
+              d.memberName ?? d.memberEmail ?? '',
+              [d.donorEmail, d.donorPhone].where((v) => v != null && v.isNotEmpty).join(' / '),
+              currency.format(d.amount),
+              d.purpose ?? '',
+              d.approvalStatus.name,
+              dateFmt.format(d.donatedAt),
+              d.reference ?? '',
+            ])
+        .toList();
+  }
+
+  Future<void> _export(BuildContext context, Future<void> Function() run) async {
+    try {
+      await run();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
   }
 
   Future<void> _showAddDonationDialog(BuildContext context, WidgetRef ref) async {
@@ -301,6 +328,30 @@ class _AdminDonationsScreenState extends ConsumerState<AdminDonationsScreen> {
               padding: const EdgeInsets.all(12),
               children: [
                 _buildFilters(context),
+                if (donations.isNotEmpty)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ExportButtonsRow(
+                      onExcel: () => _export(context, () => ExportService.exportExcel(
+                            filename: 'mihlgso_donations',
+                            title: strings.exportedFileTitleDonations,
+                            headers: const ['Donor', 'Member', 'Contact', 'Amount', 'Purpose', 'Approval', 'Date', 'Reference'],
+                            rows: _exportRows(donations, currency, dateFmt),
+                          )),
+                      onPdf: () => _export(context, () => ExportService.exportPdf(
+                            filename: 'mihlgso_donations',
+                            title: strings.exportedFileTitleDonations,
+                            headers: const ['Donor', 'Member', 'Contact', 'Amount', 'Purpose', 'Approval', 'Date', 'Reference'],
+                            rows: _exportRows(donations, currency, dateFmt),
+                          )),
+                      onCsv: () => _export(context, () => ExportService.exportCsv(
+                            filename: 'mihlgso_donations',
+                            title: strings.exportedFileTitleDonations,
+                            headers: const ['Donor', 'Member', 'Contact', 'Amount', 'Purpose', 'Approval', 'Date', 'Reference'],
+                            rows: _exportRows(donations, currency, dateFmt),
+                          )),
+                    ),
+                  ),
                 const SizedBox(height: AppSpacing.sm),
                 if (donations.isNotEmpty)
                   Container(

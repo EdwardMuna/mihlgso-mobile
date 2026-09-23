@@ -7,7 +7,9 @@ import '../../core/network/api_exception.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/payment.dart';
 import '../../providers/admin_providers.dart';
+import '../../services/export_service.dart';
 import '../../widgets/admin_card_shell.dart';
+import '../../widgets/export_buttons.dart';
 import '../../widgets/fade_slide_in.dart';
 import '../../widgets/state_views.dart';
 import 'admin_payment_add_screen.dart';
@@ -174,6 +176,36 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
     }).toList();
   }
 
+  List<List<String>> _exportRows(List<Payment> payments, Map<int, double> remainingById, NumberFormat currency, DateFormat dateFmt) {
+    return payments
+        .map((p) => [
+              p.paymentName,
+              p.memberName ?? '',
+              p.contributionType?.name ?? '',
+              currency.format(p.amountDue),
+              currency.format(p.amountPaid),
+              currency.format(remainingById[p.id] ?? p.amountRemaining),
+              p.status.name,
+              p.approvalStatus.name,
+              dateFmt.format(p.paymentDate),
+              p.reference ?? '',
+            ])
+        .toList();
+  }
+
+  Future<void> _export(
+    BuildContext context,
+    Future<void> Function() run,
+  ) async {
+    try {
+      await run();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
@@ -207,6 +239,30 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
             padding: const EdgeInsets.all(12),
             children: [
               _buildFilters(context),
+              if (payments.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ExportButtonsRow(
+                    onExcel: () => _export(context, () => ExportService.exportExcel(
+                          filename: 'mihlgso_payments',
+                          title: strings.exportedFileTitlePayments,
+                          headers: const ['Payment', 'Member', 'Contribution', 'Due', 'Paid', 'Remaining', 'Status', 'Approval', 'Date', 'Reference'],
+                          rows: _exportRows(payments, remainingById, currency, dateFmt),
+                        )),
+                    onPdf: () => _export(context, () => ExportService.exportPdf(
+                          filename: 'mihlgso_payments',
+                          title: strings.exportedFileTitlePayments,
+                          headers: const ['Payment', 'Member', 'Contribution', 'Due', 'Paid', 'Remaining', 'Status', 'Approval', 'Date', 'Reference'],
+                          rows: _exportRows(payments, remainingById, currency, dateFmt),
+                        )),
+                    onCsv: () => _export(context, () => ExportService.exportCsv(
+                          filename: 'mihlgso_payments',
+                          title: strings.exportedFileTitlePayments,
+                          headers: const ['Payment', 'Member', 'Contribution', 'Due', 'Paid', 'Remaining', 'Status', 'Approval', 'Date', 'Reference'],
+                          rows: _exportRows(payments, remainingById, currency, dateFmt),
+                        )),
+                  ),
+                ),
               const SizedBox(height: AppSpacing.sm),
               if (payments.isNotEmpty)
                 Container(
