@@ -30,7 +30,7 @@ class MemberContributorsScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.md),
             children: [
               LeaderboardCard(
-                title: strings.topContributorsTitle,
+                title: strings.topContributorsAppBarTitle,
                 icon: Icons.emoji_events_outlined,
                 accent: AppColors.primary,
                 rows: result.rows,

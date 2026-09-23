@@ -33,7 +33,7 @@ class MemberDonorsScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.md),
             children: [
               LeaderboardCard(
-                title: strings.topDonorsTitle,
+                title: strings.topDonorsAppBarTitle,
                 icon: Icons.volunteer_activism_outlined,
                 accent: AppColors.accentStrong,
                 rows: result.rows,

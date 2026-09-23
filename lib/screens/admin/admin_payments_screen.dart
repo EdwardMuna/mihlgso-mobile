@@ -7,6 +7,8 @@ import '../../core/network/api_exception.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/payment.dart';
 import '../../providers/admin_providers.dart';
+import '../../widgets/admin_card_shell.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/state_views.dart';
 import 'admin_payment_add_screen.dart';
 import 'admin_payment_edit_screen.dart';
@@ -95,11 +97,34 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
     final scheme = Theme.of(context).colorScheme;
     switch (status) {
       case ApprovalStatus.approved:
-        return Colors.green;
+        return AppColors.secondary;
       case ApprovalStatus.rejected:
         return scheme.error;
       case ApprovalStatus.pending:
-        return Colors.orange;
+        return AppColors.accentStrong;
+    }
+  }
+
+  IconData _statusIcon(ApprovalStatus status) {
+    switch (status) {
+      case ApprovalStatus.approved:
+        return Icons.check_circle_outline;
+      case ApprovalStatus.rejected:
+        return Icons.cancel_outlined;
+      case ApprovalStatus.pending:
+        return Icons.hourglass_top_outlined;
+    }
+  }
+
+  Color _paymentStatusColor(BuildContext context, PaymentStatus status) {
+    final scheme = Theme.of(context).colorScheme;
+    switch (status) {
+      case PaymentStatus.paid:
+        return AppColors.secondary;
+      case PaymentStatus.partial:
+        return AppColors.accentStrong;
+      case PaymentStatus.notPaid:
+        return scheme.error;
     }
   }
 
@@ -184,19 +209,24 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
               _buildFilters(context),
               const SizedBox(height: AppSpacing.sm),
               if (payments.isNotEmpty)
-                Card(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Wrap(
-                      spacing: 16,
-                      runSpacing: 4,
-                      children: [
-                        Text('${strings.totalDue}: ${currency.format(totalDue)}', style: Theme.of(context).textTheme.bodyMedium),
-                        Text('${strings.totalPaid}: ${currency.format(totalPaid)}', style: Theme.of(context).textTheme.bodyMedium),
-                        Text('${strings.totalRemainingPrefix}: ${currency.format(totalRemaining)}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
-                      ],
-                    ),
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+                  ),
+                  child: Row(
+                    children: [
+                      AmountStat(label: strings.duePrefix.toUpperCase(), value: currency.format(totalDue), color: AppColors.primary),
+                      AmountStat(label: strings.paidPrefix.toUpperCase(), value: currency.format(totalPaid), color: AppColors.secondary),
+                      AmountStat(
+                        label: strings.remainingPrefix.toUpperCase(),
+                        value: currency.format(totalRemaining),
+                        color: AppColors.accentStrong,
+                        flex: 2,
+                      ),
+                    ],
                   ),
                 ),
               const SizedBox(height: AppSpacing.sm),
@@ -206,69 +236,112 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
                   child: EmptyView(message: strings.noPaymentsMatchFilters, icon: Icons.payments_outlined),
                 )
               else
-                for (final p in payments)
-                  Card(
-                    child: InkWell(
-                      onTap: () => _editPayment(context, ref, p),
-                      child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(p.paymentName, style: Theme.of(context).textTheme.titleMedium),
-                              ),
-                              Chip(
-                                label: Text(p.approvalStatus.name.toUpperCase()),
-                                backgroundColor: _statusColor(context, p.approvalStatus).withValues(alpha: 0.15),
-                                labelStyle: TextStyle(color: _statusColor(context, p.approvalStatus)),
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ],
-                          ),
-                          if (p.memberName != null && p.memberName!.isNotEmpty)
-                            Text(p.memberName!, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                          if (p.contributionType != null) Text(p.contributionType!.name),
-                          Text('${strings.duePrefix} ${currency.format(p.amountDue)} · ${strings.paidPrefix} ${currency.format(p.amountPaid)} · ${strings.remainingPrefix} ${currency.format(remainingById[p.id] ?? p.amountRemaining)}'),
-                          Chip(
-                            label: Text(p.status.name.toUpperCase()),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          if (p.reference != null && p.reference!.isNotEmpty) Text('${strings.refPrefix}${p.reference}'),
-                          if (p.notes != null && p.notes!.isNotEmpty) Text(p.notes!, style: Theme.of(context).textTheme.bodySmall),
-                          Text('${strings.paymentDatePrefix} ${dateFmt.format(p.paymentDate)}', style: Theme.of(context).textTheme.bodySmall),
-                          if (p.reviewedAt != null)
-                            Text('${strings.reviewedPrefix} ${dateFmt.format(p.reviewedAt!)}', style: Theme.of(context).textTheme.bodySmall),
-                          if (p.createdAt != null)
-                            Text('${strings.recordedPrefix} ${dateFmt.format(p.createdAt!)}', style: Theme.of(context).textTheme.bodySmall),
-                          const SizedBox(height: AppSpacing.sm),
-                          Row(
-                            children: [
-                              IconButton(
-                                tooltip: strings.deleteTooltip,
-                                icon: const Icon(Icons.delete_outline),
-                                onPressed: () => _delete(context, ref, p.id),
-                              ),
-                              const Spacer(),
-                              if (p.approvalStatus == ApprovalStatus.pending) ...[
-                                OutlinedButton(
-                                  onPressed: () => _reject(context, ref, p.id),
-                                  child: Text(strings.reject),
+                for (var i = 0; i < payments.length; i++)
+                  FadeSlideIn(
+                    index: i,
+                    child: Builder(builder: (context) {
+                      final p = payments[i];
+                      return AdminCardShell(
+                        onTap: () => _editPayment(context, ref, p),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    p.paymentName,
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(width: AppSpacing.sm),
-                                FilledButton(
-                                  onPressed: () => _approve(context, ref, p.id),
-                                  child: Text(strings.approve),
+                                const SizedBox(width: 8),
+                                StatusPill(
+                                  label: p.approvalStatus.name.toUpperCase(),
+                                  color: _statusColor(context, p.approvalStatus),
+                                  icon: _statusIcon(p.approvalStatus),
                                 ),
                               ],
+                            ),
+                            if ((p.memberName ?? '').isNotEmpty || p.contributionType != null) ...[
+                              const SizedBox(height: 4),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 4,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  if ((p.memberName ?? '').isNotEmpty) ...[
+                                    Icon(Icons.person_outline, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                    Text(p.memberName!, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                                  ],
+                                  if (p.contributionType != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                                      ),
+                                      child: Text(p.contributionType!.name, style: Theme.of(context).textTheme.labelSmall),
+                                    ),
+                                ],
+                              ),
                             ],
-                          ),
-                        ],
-                      ),
-                      ),
-                    ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Row(
+                              children: [
+                                AmountStat(label: strings.duePrefix.toUpperCase(), value: currency.format(p.amountDue), color: AppColors.primary),
+                                AmountStat(label: strings.paidPrefix.toUpperCase(), value: currency.format(p.amountPaid), color: AppColors.secondary),
+                                AmountStat(
+                                  label: strings.remainingPrefix.toUpperCase(),
+                                  value: currency.format(remainingById[p.id] ?? p.amountRemaining),
+                                  color: AppColors.accentStrong,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Row(
+                              children: [
+                                StatusPill(label: p.status.name.toUpperCase(), color: _paymentStatusColor(context, p.status)),
+                                const Spacer(),
+                                Icon(Icons.calendar_today_outlined, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                const SizedBox(width: 4),
+                                Text(dateFmt.format(p.paymentDate), style: Theme.of(context).textTheme.bodySmall),
+                              ],
+                            ),
+                            if ((p.reference ?? '').isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text('${strings.refPrefix}${p.reference}', style: Theme.of(context).textTheme.bodySmall),
+                            ],
+                            if ((p.notes ?? '').isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(p.notes!, style: Theme.of(context).textTheme.bodySmall),
+                            ],
+                            const Divider(height: AppSpacing.lg),
+                            Row(
+                              children: [
+                                IconButton(
+                                  tooltip: strings.deleteTooltip,
+                                  icon: const Icon(Icons.delete_outline),
+                                  onPressed: () => _delete(context, ref, p.id),
+                                ),
+                                const Spacer(),
+                                if (p.approvalStatus == ApprovalStatus.pending) ...[
+                                  OutlinedButton(
+                                    onPressed: () => _reject(context, ref, p.id),
+                                    child: Text(strings.reject),
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  FilledButton(
+                                    onPressed: () => _approve(context, ref, p.id),
+                                    child: Text(strings.approve),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                   ),
             ],
           );

@@ -8,6 +8,8 @@ import '../../core/theme/app_theme.dart';
 import '../../models/donation.dart';
 import '../../models/payment.dart' show ApprovalStatus;
 import '../../providers/admin_providers.dart';
+import '../../widgets/admin_card_shell.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/state_views.dart';
 
 class AdminDonationsScreen extends ConsumerStatefulWidget {
@@ -84,11 +86,22 @@ class _AdminDonationsScreenState extends ConsumerState<AdminDonationsScreen> {
     final scheme = Theme.of(context).colorScheme;
     switch (status) {
       case ApprovalStatus.approved:
-        return Colors.green;
+        return AppColors.secondary;
       case ApprovalStatus.rejected:
         return scheme.error;
       case ApprovalStatus.pending:
-        return Colors.orange;
+        return AppColors.accentStrong;
+    }
+  }
+
+  IconData _statusIcon(ApprovalStatus status) {
+    switch (status) {
+      case ApprovalStatus.approved:
+        return Icons.check_circle_outline;
+      case ApprovalStatus.rejected:
+        return Icons.cancel_outlined;
+      case ApprovalStatus.pending:
+        return Icons.hourglass_top_outlined;
     }
   }
 
@@ -290,11 +303,22 @@ class _AdminDonationsScreenState extends ConsumerState<AdminDonationsScreen> {
                 _buildFilters(context),
                 const SizedBox(height: AppSpacing.sm),
                 if (donations.isNotEmpty)
-                  Card(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text('${strings.totalDonatedPrefix} ${currency.format(totalAmount)}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentStrong.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      border: Border.all(color: AppColors.accentStrong.withValues(alpha: 0.15)),
+                    ),
+                    child: Row(
+                      children: [
+                        AmountStat(
+                          label: strings.totalDonatedPrefix.toUpperCase(),
+                          value: currency.format(totalAmount),
+                          color: AppColors.accentStrong,
+                        ),
+                      ],
                     ),
                   ),
                 const SizedBox(height: AppSpacing.sm),
@@ -304,67 +328,110 @@ class _AdminDonationsScreenState extends ConsumerState<AdminDonationsScreen> {
                     child: EmptyView(message: strings.noDonationsMatchFilters, icon: Icons.volunteer_activism_outlined),
                   )
                 else
-                  for (final d in donations)
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(d.donorName, style: Theme.of(context).textTheme.titleMedium),
-                                ),
-                                Chip(
-                                  label: Text(d.approvalStatus.name.toUpperCase()),
-                                  backgroundColor: _statusColor(context, d.approvalStatus).withValues(alpha: 0.15),
-                                  labelStyle: TextStyle(color: _statusColor(context, d.approvalStatus)),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                              ],
-                            ),
-                            if (d.memberEmail != null && d.memberEmail!.isNotEmpty)
-                              Text('${strings.memberPrefix}${d.memberName ?? d.memberEmail}', style: Theme.of(context).textTheme.bodySmall)
-                            else if ((d.donorEmail != null && d.donorEmail!.isNotEmpty) || (d.donorPhone != null && d.donorPhone!.isNotEmpty))
-                              Text(
-                                [d.donorEmail, d.donorPhone].where((v) => v != null && v.isNotEmpty).join(' · '),
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            Text(currency.format(d.amount)),
-                            if (d.purpose != null && d.purpose!.isNotEmpty) Text(d.purpose!),
-                            if (d.reference != null && d.reference!.isNotEmpty) Text('${strings.refPrefix}${d.reference}'),
-                            if (d.notes != null && d.notes!.isNotEmpty) Text(d.notes!, style: Theme.of(context).textTheme.bodySmall),
-                            Text('${strings.donatedPrefix} ${dateFmt.format(d.donatedAt)}', style: Theme.of(context).textTheme.bodySmall),
-                            if (d.reviewedAt != null)
-                              Text('${strings.reviewedPrefix} ${dateFmt.format(d.reviewedAt!)}', style: Theme.of(context).textTheme.bodySmall),
-                            if (d.createdAt != null)
-                              Text('${strings.recordedPrefix} ${dateFmt.format(d.createdAt!)}', style: Theme.of(context).textTheme.bodySmall),
-                            const SizedBox(height: AppSpacing.sm),
-                            Row(
-                              children: [
-                                IconButton(
-                                  tooltip: strings.deleteTooltip,
-                                  icon: const Icon(Icons.delete_outline),
-                                  onPressed: () => _delete(context, ref, d.id),
-                                ),
-                                const Spacer(),
-                                if (d.approvalStatus == ApprovalStatus.pending) ...[
-                                  OutlinedButton(
-                                    onPressed: () => _reject(context, ref, d.id),
-                                    child: Text(strings.reject),
+                  for (var i = 0; i < donations.length; i++)
+                    FadeSlideIn(
+                      index: i,
+                      child: Builder(builder: (context) {
+                        final d = donations[i];
+                        return AdminCardShell(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      d.donorName,
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  FilledButton(
-                                    onPressed: () => _approve(context, ref, d.id),
-                                    child: Text(strings.approve),
+                                  const SizedBox(width: 8),
+                                  StatusPill(
+                                    label: d.approvalStatus.name.toUpperCase(),
+                                    color: _statusColor(context, d.approvalStatus),
+                                    icon: _statusIcon(d.approvalStatus),
                                   ),
                                 ],
+                              ),
+                              if ((d.memberEmail ?? '').isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.person_outline, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                      const SizedBox(width: 4),
+                                      Text(d.memberName ?? d.memberEmail!, style: Theme.of(context).textTheme.bodySmall),
+                                    ],
+                                  ),
+                                )
+                              else if ((d.donorEmail ?? '').isNotEmpty || (d.donorPhone ?? '').isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text(
+                                    [d.donorEmail, d.donorPhone].where((v) => v != null && v.isNotEmpty).join(' · '),
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                currency.format(d.amount),
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, color: AppColors.accentStrong),
+                              ),
+                              if ((d.purpose ?? '').isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                                  ),
+                                  child: Text(d.purpose!, style: Theme.of(context).textTheme.labelSmall),
+                                ),
                               ],
-                            ),
-                          ],
-                        ),
-                      ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_today_outlined, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                  const SizedBox(width: 4),
+                                  Text(dateFmt.format(d.donatedAt), style: Theme.of(context).textTheme.bodySmall),
+                                ],
+                              ),
+                              if ((d.reference ?? '').isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text('${strings.refPrefix}${d.reference}', style: Theme.of(context).textTheme.bodySmall),
+                              ],
+                              if ((d.notes ?? '').isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(d.notes!, style: Theme.of(context).textTheme.bodySmall),
+                              ],
+                              const Divider(height: AppSpacing.lg),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    tooltip: strings.deleteTooltip,
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: () => _delete(context, ref, d.id),
+                                  ),
+                                  const Spacer(),
+                                  if (d.approvalStatus == ApprovalStatus.pending) ...[
+                                    OutlinedButton(
+                                      onPressed: () => _reject(context, ref, d.id),
+                                      child: Text(strings.reject),
+                                    ),
+                                    const SizedBox(width: AppSpacing.sm),
+                                    FilledButton(
+                                      onPressed: () => _approve(context, ref, d.id),
+                                      child: Text(strings.approve),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                     ),
               ],
             );

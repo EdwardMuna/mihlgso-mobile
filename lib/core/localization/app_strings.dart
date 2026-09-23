@@ -222,8 +222,6 @@ class AppStrings {
     'yes': 'Yes',
     'no': 'No',
     'joined': 'Joined',
-    'reviewedPrefix': 'Reviewed',
-    'recordedPrefix': 'Recorded',
     'addedPrefix': 'Added',
     'refPrefix': 'Ref',
     'memberPrefix': 'Member',
@@ -239,6 +237,7 @@ class AppStrings {
     'copyPasswordTooltip': 'Copy password',
     'copiedToClipboard': 'Copied to clipboard',
     'noPendingApplications': 'No pending applications.',
+    'applicationDetails': 'Application details',
     // Admin: members
     'addMember': 'Add Member',
     'addMemberTooltip': 'Add Member',
@@ -634,8 +633,6 @@ class AppStrings {
     'yes': 'Ndiyo',
     'no': 'Hapana',
     'joined': 'Alijiunga',
-    'reviewedPrefix': 'Imekaguliwa',
-    'recordedPrefix': 'Imerekodiwa',
     'addedPrefix': 'Imeongezwa',
     'refPrefix': 'Kumbukumbu',
     'memberPrefix': 'Mwanachama',
@@ -651,6 +648,7 @@ class AppStrings {
     'copyPasswordTooltip': 'Nakili nenosiri',
     'copiedToClipboard': 'Imenakiliwa',
     'noPendingApplications': 'Hakuna maombi yanayosubiri.',
+    'applicationDetails': 'Maelezo ya Ombi',
     // Admin: members
     'addMember': 'Ongeza Mwanachama',
     'addMemberTooltip': 'Ongeza Mwanachama',
@@ -1092,8 +1090,6 @@ class AppStrings {
   String get yes => _values['yes']!;
   String get no => _values['no']!;
   String get joined => _values['joined']!;
-  String get reviewedPrefix => _values['reviewedPrefix']!;
-  String get recordedPrefix => _values['recordedPrefix']!;
   String get addedPrefix => _values['addedPrefix']!;
   String get refPrefix => _values['refPrefix']!;
   String get memberPrefix => _values['memberPrefix']!;
@@ -1110,6 +1106,7 @@ class AppStrings {
   String get copyPasswordTooltip => _values['copyPasswordTooltip']!;
   String get copiedToClipboard => _values['copiedToClipboard']!;
   String get noPendingApplications => _values['noPendingApplications']!;
+  String get applicationDetails => _values['applicationDetails']!;
 
   // Admin: members
   String get addMember => _values['addMember']!;

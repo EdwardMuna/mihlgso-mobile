@@ -7,6 +7,8 @@ import '../../core/localization/app_strings.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
+import '../../widgets/admin_card_shell.dart';
+import '../../widgets/fade_slide_in.dart';
 import '../../widgets/state_views.dart';
 import 'member_detail_screen.dart' show memberAvatarImage;
 
@@ -119,55 +121,106 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
               itemCount: apps.length,
               itemBuilder: (context, i) {
                 final a = apps[i];
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
+                final isMember = a.registrationType == 'MEMBER';
+                return FadeSlideIn(
+                  index: i,
+                  child: AdminCardShell(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (a.photoDataUrl != null)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: CircleAvatar(radius: 22, backgroundImage: memberAvatarImage(a.photoDataUrl)),
-                              ),
+                            CircleAvatar(
+                              radius: 22,
+                              backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                              backgroundImage: memberAvatarImage(a.photoDataUrl),
+                              child: a.photoDataUrl == null
+                                  ? Text(
+                                      a.name.isNotEmpty ? a.name[0].toUpperCase() : '?',
+                                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(a.name, style: Theme.of(context).textTheme.titleMedium),
-                                  Text('${a.email} · ${a.phone}'),
-                                  Text('${a.registrationType} · ${dateFmt.format(a.createdAt)}',
-                                      style: Theme.of(context).textTheme.bodySmall),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          a.name,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      StatusPill(
+                                        label: a.registrationType,
+                                        color: isMember ? AppColors.primary : AppColors.secondaryDark,
+                                        icon: isMember ? Icons.school_outlined : Icons.handshake_outlined,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text('${a.email} · ${a.phone}', style: Theme.of(context).textTheme.bodySmall, overflow: TextOverflow.ellipsis),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.calendar_today_outlined, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                      const SizedBox(width: 4),
+                                      Text(dateFmt.format(a.createdAt), style: Theme.of(context).textTheme.bodySmall),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        if (a.registrationType == 'MEMBER') ...[
-                          const SizedBox(height: 6),
-                          _Detail(label: strings.memberType, value: a.memberType),
-                          _Detail(label: strings.institution, value: a.institution),
-                          _Detail(label: strings.graduatedYearLabel, value: a.graduatedYear?.toString()),
-                          _Detail(label: strings.postalAddress, value: a.postalAddress),
-                          _Detail(label: strings.currentResidential, value: a.currentResidential),
-                          _Detail(label: strings.employmentStatus, value: a.employmentStatus),
-                          _Detail(label: strings.levelOfEducation, value: a.levelOfEducation),
-                          _Detail(label: strings.gender, value: a.gender),
-                          _Detail(label: strings.academicDiscipline, value: a.academicDiscipline),
-                          _Detail(label: strings.employerOffice, value: a.employer),
-                          _Detail(label: strings.nationality, value: a.nationality),
-                          _Detail(label: strings.placeOfLiving, value: a.placeOfLiving),
-                        ],
                         if (a.message != null && a.message!.isNotEmpty) ...[
-                          const SizedBox(height: AppSpacing.xs),
-                          Text('"${a.message}"', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic)),
+                          const SizedBox(height: AppSpacing.sm),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(AppSpacing.sm),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(AppRadius.sm),
+                            ),
+                            child: Text(
+                              '"${a.message}"',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+                            ),
+                          ),
                         ],
-                        if (a.reviewedAt != null)
-                          Text('${strings.reviewedPrefix} ${dateFmt.format(a.reviewedAt!)}', style: Theme.of(context).textTheme.bodySmall),
-                        const SizedBox(height: AppSpacing.sm),
+                        if (isMember) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          Theme(
+                            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                            child: ExpansionTile(
+                              tilePadding: EdgeInsets.zero,
+                              childrenPadding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                              title: Text(strings.applicationDetails, style: Theme.of(context).textTheme.labelMedium),
+                              leading: const Icon(Icons.info_outline, size: 18),
+                              children: [
+                                _Detail(label: strings.memberType, value: a.memberType),
+                                _Detail(label: strings.institution, value: a.institution),
+                                _Detail(label: strings.graduatedYearLabel, value: a.graduatedYear?.toString()),
+                                _Detail(label: strings.postalAddress, value: a.postalAddress),
+                                _Detail(label: strings.currentResidential, value: a.currentResidential),
+                                _Detail(label: strings.employmentStatus, value: a.employmentStatus),
+                                _Detail(label: strings.levelOfEducation, value: a.levelOfEducation),
+                                _Detail(label: strings.gender, value: a.gender),
+                                _Detail(label: strings.academicDiscipline, value: a.academicDiscipline),
+                                _Detail(label: strings.employerOffice, value: a.employer),
+                                _Detail(label: strings.nationality, value: a.nationality),
+                                _Detail(label: strings.placeOfLiving, value: a.placeOfLiving),
+                              ],
+                            ),
+                          ),
+                        ],
+                        const Divider(height: AppSpacing.lg),
                         Row(
                           children: [
                             Expanded(
