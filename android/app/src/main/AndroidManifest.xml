@@ -1,5 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Only needed pre-scoped-storage (Android 9/API 28 and below) to write
+         exported files directly into the public Downloads folder. Android 10+
+         uses MediaStore.Downloads instead, which needs no permission. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
     <application
         android:label="MIHLGSO"
         android:name="${applicationName}"

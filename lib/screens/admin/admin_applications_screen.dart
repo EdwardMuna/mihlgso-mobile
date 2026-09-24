@@ -118,6 +118,9 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
   Future<void> _export(BuildContext context, Future<void> Function() run) async {
     try {
       await run();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppStrings.of(context).savedToDownloads)));
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));

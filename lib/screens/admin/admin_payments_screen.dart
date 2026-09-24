@@ -199,6 +199,9 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
   ) async {
     try {
       await run();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppStrings.of(context).savedToDownloads)));
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
