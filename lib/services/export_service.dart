@@ -22,9 +22,7 @@ class ExportService {
   }
 
   static Future<void> _share(File file, String subject) async {
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], subject: subject),
-    );
+    await Share.shareXFiles([XFile(file.path)], subject: subject);
   }
 
   static Future<void> exportCsv({
