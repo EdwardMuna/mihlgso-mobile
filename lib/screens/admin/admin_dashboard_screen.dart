@@ -145,7 +145,14 @@ class AdminDashboardScreen extends ConsumerWidget {
                 // — each row there shows the contribution it's for.
                 onTap: () => ref.read(adminTabIndexProvider.notifier).state = 4,
               ),
-              TintedStatCard(label: strings.totalDonated, value: currency.format(stats.totalDonated), icon: Icons.volunteer_activism, color: AppColors.accentStrong),
+              TintedStatCard(
+                label: strings.totalDonated,
+                value: currency.format(stats.totalDonated),
+                icon: Icons.volunteer_activism,
+                color: AppColors.accentStrong,
+                // Mirrors the website's card, which links to /admin/donations.
+                onTap: () => ref.read(adminTabIndexProvider.notifier).state = 5,
+              ),
               TintedStatCard(
                 label: strings.beneficiariesServedTitle,
                 value: '${stats.beneficiariesCount}',
