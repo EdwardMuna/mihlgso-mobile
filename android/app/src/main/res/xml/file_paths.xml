@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Covers the public Downloads directory, which is where
+         MainActivity.saveToDownloads writes on Android 9 and below. -->
+    <external-path name="downloads" path="Download/" />
+</paths>

@@ -43,6 +43,13 @@ kotlin {
     }
 }
 
+dependencies {
+    // FileProvider (pre-Android-10 downloaded-file sharing) and
+    // NotificationCompat (the "download complete" notification), used by
+    // MainActivity.kt.
+    implementation("androidx.core:core-ktx:1.13.1")
+}
+
 flutter {
     source = "../.."
 }
