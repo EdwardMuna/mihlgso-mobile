@@ -169,7 +169,7 @@ class _AdminDonationsScreenState extends ConsumerState<AdminDonationsScreen> {
       rows.add([
         '${i + 1}',
         d.donorName,
-        d.memberName ?? d.memberEmail ?? [d.donorEmail, d.donorPhone].where((v) => v != null && v.isNotEmpty).join(' · '),
+        d.memberEmail ?? [d.donorEmail, d.donorPhone].where((v) => v != null && v.isNotEmpty).join(' · '),
         d.purpose ?? '',
         d.reference ?? '',
         currency.format(d.amount),

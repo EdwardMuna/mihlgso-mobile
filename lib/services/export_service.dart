@@ -67,6 +67,7 @@ class ExportService {
   static const _channel = MethodChannel('mihlgso/downloads');
   static const _orgName = 'MIHLGSO';
   static const _contactLine = 'Mafia Island, Tanzania   •   +255 655 942 925   •   +255 786 552 590';
+  static const _contactParts = ['Mafia Island, Tanzania', '+255 655 942 925', '+255 786 552 590'];
 
   static Future<void> _saveToDownloads(String name, List<int> bytes, String mimeType) async {
     await _channel.invokeMethod<String>('saveToDownloads', {
@@ -198,6 +199,40 @@ class ExportService {
     final tableData = [...data.rows, if (data.totalRow != null) data.totalRow!];
     final totalRowNum = data.totalRow != null ? tableData.length - 1 : -1;
 
+    // A plain "•" glyph isn't in the core PDF font's mapped range and comes
+    // out as a tofu box, so the bullet separator is drawn as a small dot
+    // shape instead of relying on the character.
+    pw.Widget dot() => pw.Container(
+          width: 3,
+          height: 3,
+          margin: const pw.EdgeInsets.symmetric(horizontal: 6),
+          decoration: const pw.BoxDecoration(color: PdfColors.white, shape: pw.BoxShape.circle),
+        );
+
+    pw.Widget separatedLine(List<String> parts, {required double fontSize}) => pw.Row(
+          mainAxisSize: pw.MainAxisSize.min,
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            for (var i = 0; i < parts.length; i++) ...[
+              if (i > 0) dot(),
+              pw.Text(parts[i], style: pw.TextStyle(fontSize: fontSize, color: PdfColors.white)),
+            ],
+          ],
+        );
+
+    // Mirrors jsPDF-autotable's default "auto" column sizing on the website:
+    // each column's share of the width is proportional to its longest cell
+    // (header or data), so short fields (Gender/Status/Donor) stay narrow
+    // and long ones (Employer/Academic Discipline) get the extra room,
+    // instead of the table splitting width evenly regardless of content.
+    final columnWidths = <int, pw.TableColumnWidth>{
+      0: const pw.FixedColumnWidth(24),
+      for (var c = 1; c < colCount; c++)
+        c: pw.FlexColumnWidth(
+          [headers[c].length, for (final row in tableData) row[c].length].reduce((a, b) => a > b ? a : b).clamp(6, 60).toDouble(),
+        ),
+    };
+
     final doc = pw.Document();
     doc.addPage(
       pw.MultiPage(
@@ -214,10 +249,7 @@ class ExportService {
               pw.SizedBox(height: 4),
               pw.Text(_orgName, style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
               pw.SizedBox(height: 2),
-              pw.Text(
-                '$title   •   Printed: $printedAt',
-                style: pw.TextStyle(fontSize: 8, color: PdfColors.white),
-              ),
+              separatedLine([title, 'Printed: $printedAt'], fontSize: 8),
             ],
           ),
         ),
@@ -226,15 +258,17 @@ class ExportService {
           decoration: bandDecoration(),
           padding: const pw.EdgeInsets.symmetric(vertical: 6),
           alignment: pw.Alignment.center,
-          child: pw.Text(_contactLine, style: pw.TextStyle(fontSize: 8, color: PdfColors.white)),
+          child: separatedLine(_contactParts, fontSize: 8),
         ),
         build: (context) => [
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: pw.Table(
+              columnWidths: columnWidths,
               defaultVerticalAlignment: pw.TableCellVerticalAlignment.middle,
               children: [
                 pw.TableRow(
+                  repeat: true,
                   children: [for (var c = 0; c < colCount; c++) gradientCell(headers[c], c, bold: true)],
                 ),
                 for (var r = 0; r < tableData.length; r++)
