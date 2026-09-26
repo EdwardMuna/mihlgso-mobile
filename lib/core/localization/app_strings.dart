@@ -139,6 +139,16 @@ class AppStrings {
     'applicationSubmittedMessage': 'Application submitted! We will review it and email you the outcome.',
     'stakeholder': 'Stakeholder',
     'member': 'Member',
+    'payment': 'Payment',
+    'approval': 'Approval',
+    'date': 'Date',
+    'totals': 'Totals',
+    'donor': 'Donor',
+    'totalAmountDonated': 'Total Amount Donated',
+    'totalAmountPaid': 'Total Amount Paid',
+    'applicant': 'Applicant',
+    'type': 'Type',
+    'submitted': 'Submitted',
     'fullName': 'Full Name',
     'phoneLabel': 'Phone',
     'enterValidPhone': 'Enter a valid phone',
@@ -244,6 +254,9 @@ class AppStrings {
     'exportedFileTitlePayments': 'MIHLGSO Payments',
     'exportedFileTitleDonations': 'MIHLGSO Donations',
     'exportedFileTitleApplications': 'MIHLGSO Applications',
+    'exportedFileTitleMembers': 'MIHLGSO Members',
+    'exportedFileTitleMyPayments': 'My Payments',
+    'exportedFileTitleMyDonations': 'My Donations',
     // Admin: members
     'addMember': 'Add Member',
     'addMemberTooltip': 'Add Member',
@@ -424,6 +437,15 @@ class AppStrings {
     'messageGroupButton': 'Message Group',
     'addMembersButton': 'Add Members',
     'noContactsInGroupYet': 'No contacts in this group yet.',
+    // Where to pay (bank accounts)
+    'bankAccountsTitle': 'Bank Accounts',
+    'bankAccountsSubtitle': 'Where to pay your contributions.',
+    'bankAccountsEmpty': 'No bank accounts have been set up yet.',
+    'bankTabAnnual': 'Annual Subscription',
+    'bankTabOthers': 'Other Contributions',
+    'bankAccountNumberLabel': 'Account Number',
+    'copy': 'Copy',
+    'copied': 'Copied',
   };
 
   static const _sw = {
@@ -556,6 +578,16 @@ class AppStrings {
     'applicationSubmittedMessage': 'Ombi limewasilishwa! Tutalipitia na kukutumia matokeo kwa barua pepe.',
     'stakeholder': 'Mdau',
     'member': 'Mwanachama',
+    'payment': 'Malipo',
+    'approval': 'Idhini',
+    'date': 'Tarehe',
+    'totals': 'Jumla',
+    'donor': 'Mfadhili',
+    'totalAmountDonated': 'Jumla ya Mchango',
+    'totalAmountPaid': 'Jumla ya Malipo',
+    'applicant': 'Mwombaji',
+    'type': 'Aina',
+    'submitted': 'Iliyowasilishwa',
     'fullName': 'Jina Kamili',
     'phoneLabel': 'Simu',
     'enterValidPhone': 'Weka namba sahihi ya simu',
@@ -661,6 +693,9 @@ class AppStrings {
     'exportedFileTitlePayments': 'Malipo ya MIHLGSO',
     'exportedFileTitleDonations': 'Michango ya MIHLGSO',
     'exportedFileTitleApplications': 'Maombi ya MIHLGSO',
+    'exportedFileTitleMembers': 'Wanachama wa MIHLGSO',
+    'exportedFileTitleMyPayments': 'Malipo Yangu',
+    'exportedFileTitleMyDonations': 'Michango Yangu',
     // Admin: members
     'addMember': 'Ongeza Mwanachama',
     'addMemberTooltip': 'Ongeza Mwanachama',
@@ -841,6 +876,15 @@ class AppStrings {
     'messageGroupButton': 'Tuma Ujumbe kwa Kikundi',
     'addMembersButton': 'Ongeza Wanachama',
     'noContactsInGroupYet': 'Hakuna anwani kwenye kikundi hiki bado.',
+    // Where to pay (bank accounts)
+    'bankAccountsTitle': 'Akaunti za Benki',
+    'bankAccountsSubtitle': 'Mahali pa kulipia michango yako.',
+    'bankAccountsEmpty': 'Hakuna akaunti za benki zilizowekwa bado.',
+    'bankTabAnnual': 'Ada ya Mwaka',
+    'bankTabOthers': 'Michango Mingine',
+    'bankAccountNumberLabel': 'Namba ya Akaunti',
+    'copy': 'Nakili',
+    'copied': 'Imenakiliwa',
   };
 
   static AppStrings of(BuildContext context) {
@@ -986,6 +1030,16 @@ class AppStrings {
   String get applicationSubmittedMessage => _values['applicationSubmittedMessage']!;
   String get stakeholder => _values['stakeholder']!;
   String get member => _values['member']!;
+  String get payment => _values['payment']!;
+  String get approval => _values['approval']!;
+  String get date => _values['date']!;
+  String get totals => _values['totals']!;
+  String get donor => _values['donor']!;
+  String get totalAmountDonated => _values['totalAmountDonated']!;
+  String get totalAmountPaid => _values['totalAmountPaid']!;
+  String get applicant => _values['applicant']!;
+  String get type => _values['type']!;
+  String get submitted => _values['submitted']!;
   String get fullName => _values['fullName']!;
   String get phoneLabel => _values['phoneLabel']!;
   String get enterValidPhone => _values['enterValidPhone']!;
@@ -1125,6 +1179,9 @@ class AppStrings {
   String get exportedFileTitlePayments => _values['exportedFileTitlePayments']!;
   String get exportedFileTitleDonations => _values['exportedFileTitleDonations']!;
   String get exportedFileTitleApplications => _values['exportedFileTitleApplications']!;
+  String get exportedFileTitleMembers => _values['exportedFileTitleMembers']!;
+  String get exportedFileTitleMyPayments => _values['exportedFileTitleMyPayments']!;
+  String get exportedFileTitleMyDonations => _values['exportedFileTitleMyDonations']!;
 
   // Admin: members
   String get addMember => _values['addMember']!;
@@ -1309,4 +1366,14 @@ class AppStrings {
   String get messageGroupButton => _values['messageGroupButton']!;
   String get addMembersButton => _values['addMembersButton']!;
   String get noContactsInGroupYet => _values['noContactsInGroupYet']!;
+
+  // Where to pay (bank accounts)
+  String get bankAccountsTitle => _values['bankAccountsTitle']!;
+  String get bankAccountsSubtitle => _values['bankAccountsSubtitle']!;
+  String get bankAccountsEmpty => _values['bankAccountsEmpty']!;
+  String get bankTabAnnual => _values['bankTabAnnual']!;
+  String get bankTabOthers => _values['bankTabOthers']!;
+  String get bankAccountNumberLabel => _values['bankAccountNumberLabel']!;
+  String get copy => _values['copy']!;
+  String get copied => _values['copied']!;
 }

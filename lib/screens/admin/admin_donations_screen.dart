@@ -146,19 +146,53 @@ class _AdminDonationsScreenState extends ConsumerState<AdminDonationsScreen> {
     }).toList();
   }
 
-  List<List<String>> _exportRows(List<Donation> donations, NumberFormat currency, DateFormat dateFmt) {
-    return donations
-        .map((d) => [
-              d.donorName,
-              d.memberName ?? d.memberEmail ?? '',
-              [d.donorEmail, d.donorPhone].where((v) => v != null && v.isNotEmpty).join(' / '),
-              currency.format(d.amount),
-              d.purpose ?? '',
-              d.approvalStatus.name,
-              dateFmt.format(d.donatedAt),
-              d.reference ?? '',
-            ])
-        .toList();
+  String _approvalStatusLabel(AppStrings strings, ApprovalStatus status) => switch (status) {
+        ApprovalStatus.approved => strings.approvedStatus,
+        ApprovalStatus.rejected => strings.rejectedStatus,
+        ApprovalStatus.pending => strings.pendingApproval,
+      };
+
+  // Mirrors the website's exportColumns/exportRows/exportTotalRow in
+  // app/[locale]/admin/donations/page.tsx: "#", donor, contact, purpose,
+  // reference, amount, date, approval — the totals row's label sits under
+  // the donor column.
+  ExportData _buildExportData(
+    AppStrings strings,
+    List<Donation> donations,
+    NumberFormat currency,
+    DateFormat dateFmt,
+    double totalAmount,
+  ) {
+    final rows = <List<String>>[];
+    for (var i = 0; i < donations.length; i++) {
+      final d = donations[i];
+      rows.add([
+        '${i + 1}',
+        d.donorName,
+        d.memberName ?? d.memberEmail ?? [d.donorEmail, d.donorPhone].where((v) => v != null && v.isNotEmpty).join(' · '),
+        d.purpose ?? '',
+        d.reference ?? '',
+        currency.format(d.amount),
+        dateFmt.format(d.donatedAt),
+        _approvalStatusLabel(strings, d.approvalStatus),
+      ]);
+    }
+    return ExportData(
+      headers: ['#', strings.donor, strings.contact, strings.purposeLabel, strings.referenceLabel, strings.amount, strings.date, strings.approval],
+      rows: rows,
+      totalRow: donations.isEmpty
+          ? null
+          : [
+              strings.totalAmountDonated,
+              '',
+              '',
+              '',
+              '',
+              currency.format(totalAmount),
+              '',
+              '',
+            ],
+    );
   }
 
   Future<void> _export(BuildContext context, Future<void> Function() run) async {
@@ -338,16 +372,12 @@ class _AdminDonationsScreenState extends ConsumerState<AdminDonationsScreen> {
                       onExcel: () => _export(context, () => ExportService.exportExcel(
                             filename: 'mihlgso_donations',
                             title: strings.exportedFileTitleDonations,
-                            headers: const ['Donor', 'Member', 'Contact', 'Amount', 'Purpose', 'Approval', 'Date', 'Reference'],
-                            rows: _exportRows(donations, currency, dateFmt),
-                            summary: [MapEntry(strings.totalDonatedPrefix, currency.format(totalAmount))],
+                            data: _buildExportData(strings, donations, currency, dateFmt, totalAmount),
                           )),
                       onPdf: () => _export(context, () => ExportService.exportPdf(
                             filename: 'mihlgso_donations',
                             title: strings.exportedFileTitleDonations,
-                            headers: const ['Donor', 'Member', 'Contact', 'Amount', 'Purpose', 'Approval', 'Date', 'Reference'],
-                            rows: _exportRows(donations, currency, dateFmt),
-                            summary: [MapEntry(strings.totalDonatedPrefix, currency.format(totalAmount))],
+                            data: _buildExportData(strings, donations, currency, dateFmt, totalAmount),
                           )),
                     ),
                   ),

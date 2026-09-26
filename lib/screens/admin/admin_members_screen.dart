@@ -7,6 +7,8 @@ import '../../core/network/api_exception.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/admin_member.dart';
 import '../../providers/admin_providers.dart';
+import '../../services/export_service.dart';
+import '../../widgets/export_buttons.dart';
 import '../../widgets/state_views.dart';
 import 'member_detail_screen.dart';
 import 'member_form_screen.dart';
@@ -53,6 +55,57 @@ class _AdminMembersScreenState extends ConsumerState<AdminMembersScreen> {
       MaterialPageRoute(builder: (_) => const MemberFormScreen()),
     );
     if (created == true) ref.invalidate(adminMembersProvider);
+  }
+
+  Future<void> _export(BuildContext context, Future<void> Function() run) async {
+    try {
+      await run();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppStrings.of(context).savedToDownloads)));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+  }
+
+  // Mirrors the website's exportColumns/exportRows in
+  // app/[locale]/admin/members/page.tsx: "#", Name, Education Level,
+  // Graduated Year, Academic Discipline, Employer, Gender, Status, Donor?,
+  // Joined — no totals row (nothing monetary to sum).
+  ExportData _buildExportData(AppStrings strings, List<AdminMember> members, DateFormat dateFmt) {
+    final rows = <List<String>>[];
+    for (var i = 0; i < members.length; i++) {
+      final m = members[i];
+      rows.add([
+        '${i + 1}',
+        m.name,
+        m.educationLevel ?? '',
+        m.graduatedYear?.toString() ?? '',
+        m.academicDiscipline ?? '',
+        m.employer ?? '',
+        m.gender ?? '',
+        m.status,
+        m.isDonor ? strings.yes : strings.no,
+        m.createdAt != null ? dateFmt.format(m.createdAt!) : '',
+      ]);
+    }
+    return ExportData(
+      headers: [
+        '#',
+        strings.name,
+        strings.educationLevel,
+        strings.graduatedYear,
+        strings.academicDiscipline,
+        strings.employerOffice,
+        strings.gender,
+        strings.status,
+        strings.donorChip,
+        strings.joinedPrefix,
+      ],
+      rows: rows,
+    );
   }
 
   @override
@@ -116,6 +169,22 @@ class _AdminMembersScreenState extends ConsumerState<AdminMembersScreen> {
                 }
                 return Column(
                   children: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ExportButtonsRow(
+                        onExcel: () => _export(context, () => ExportService.exportExcel(
+                              filename: 'mihlgso_members',
+                              title: strings.exportedFileTitleMembers,
+                              data: _buildExportData(strings, filtered, dateFmt),
+                            )),
+                        onPdf: () => _export(context, () => ExportService.exportPdf(
+                              filename: 'mihlgso_members',
+                              title: strings.exportedFileTitleMembers,
+                              data: _buildExportData(strings, filtered, dateFmt),
+                            )),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
                     for (final m in filtered)
                       Card(
                         child: InkWell(

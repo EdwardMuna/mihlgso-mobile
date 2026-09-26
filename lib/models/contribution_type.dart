@@ -7,6 +7,10 @@ class ContributionType {
     this.description,
     this.createdAt,
     this.updatedAt,
+    this.bankName,
+    this.bankAccountName,
+    this.bankAccountNumber,
+    this.bankBranch,
   });
 
   factory ContributionType.fromJson(Map<String, dynamic> json) {
@@ -18,6 +22,10 @@ class ContributionType {
       isActive: json['isActive'] as bool? ?? true,
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
       updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt'] as String) : null,
+      bankName: json['bankName'] as String?,
+      bankAccountName: json['bankAccountName'] as String?,
+      bankAccountNumber: json['bankAccountNumber'] as String?,
+      bankBranch: json['bankBranch'] as String?,
     );
   }
 
@@ -28,4 +36,11 @@ class ContributionType {
   final bool isActive;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? bankName;
+  final String? bankAccountName;
+  final String? bankAccountNumber;
+  final String? bankBranch;
+
+  bool get hasBankAccount =>
+      (bankName?.trim().isNotEmpty ?? false) || (bankAccountNumber?.trim().isNotEmpty ?? false);
 }

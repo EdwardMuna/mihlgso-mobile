@@ -176,35 +176,65 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
     }).toList();
   }
 
-  List<List<String>> _exportRows(List<Payment> payments, Map<int, double> remainingById, NumberFormat currency, DateFormat dateFmt) {
-    return payments
-        .map((p) => [
-              p.paymentName,
-              p.memberName ?? '',
-              p.contributionType?.name ?? '',
-              currency.format(p.amountDue),
-              currency.format(p.amountPaid),
-              currency.format(remainingById[p.id] ?? p.amountRemaining),
-              p.status.name,
-              p.approvalStatus.name,
-              dateFmt.format(p.paymentDate),
-              p.reference ?? '',
-            ])
-        .toList();
-  }
+  String _paymentStatusLabel(AppStrings strings, PaymentStatus status) => switch (status) {
+        PaymentStatus.paid => strings.paidStatus,
+        PaymentStatus.partial => strings.partiallyPaidStatus,
+        PaymentStatus.notPaid => strings.notPaidStatus,
+      };
 
-  List<MapEntry<String, String>> _summaryEntries(
+  String _approvalStatusLabel(AppStrings strings, ApprovalStatus status) => switch (status) {
+        ApprovalStatus.approved => strings.approvedStatus,
+        ApprovalStatus.rejected => strings.rejectedStatus,
+        ApprovalStatus.pending => strings.pendingApproval,
+      };
+
+  // Mirrors the website's exportColumns/exportRows/exportTotalRow in
+  // app/[locale]/admin/payments/page.tsx: "#", member, payment name, due,
+  // paid, remaining, status, approval, date — no contribution type or
+  // reference columns, and the totals row's "Totals" label sits under the
+  // payment-name column with member left blank.
+  ExportData _buildExportData(
     AppStrings strings,
+    List<Payment> payments,
+    Map<int, double> remainingById,
     NumberFormat currency,
+    DateFormat dateFmt,
     double totalDue,
     double totalPaid,
     double totalRemaining,
   ) {
-    return [
-      MapEntry(strings.totalDue, currency.format(totalDue)),
-      MapEntry(strings.totalPaid, currency.format(totalPaid)),
-      MapEntry(strings.totalRemainingPrefix, currency.format(totalRemaining)),
-    ];
+    final rows = <List<String>>[];
+    for (var i = 0; i < payments.length; i++) {
+      final p = payments[i];
+      rows.add([
+        '${i + 1}',
+        p.memberName ?? '',
+        p.paymentName,
+        currency.format(p.amountDue),
+        currency.format(p.amountPaid),
+        currency.format(remainingById[p.id] ?? p.amountRemaining),
+        _paymentStatusLabel(strings, p.status),
+        _approvalStatusLabel(strings, p.approvalStatus),
+        dateFmt.format(p.paymentDate),
+      ]);
+    }
+    return ExportData(
+      headers: ['#', strings.member, strings.payment, strings.duePrefix, strings.paidPrefix, strings.remainingPrefix, strings.status, strings.approval, strings.date],
+      rows: rows,
+      totalRow: payments.isEmpty
+          ? null
+          : [
+              '',
+              '',
+              strings.totals,
+              currency.format(totalDue),
+              currency.format(totalPaid),
+              currency.format(totalRemaining),
+              '',
+              '',
+              '',
+            ],
+    );
   }
 
   Future<void> _export(
@@ -263,16 +293,12 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
                     onExcel: () => _export(context, () => ExportService.exportExcel(
                           filename: 'mihlgso_payments',
                           title: strings.exportedFileTitlePayments,
-                          headers: const ['Payment', 'Member', 'Contribution', 'Due', 'Paid', 'Remaining', 'Status', 'Approval', 'Date', 'Reference'],
-                          rows: _exportRows(payments, remainingById, currency, dateFmt),
-                          summary: _summaryEntries(strings, currency, totalDue, totalPaid, totalRemaining),
+                          data: _buildExportData(strings, payments, remainingById, currency, dateFmt, totalDue, totalPaid, totalRemaining),
                         )),
                     onPdf: () => _export(context, () => ExportService.exportPdf(
                           filename: 'mihlgso_payments',
                           title: strings.exportedFileTitlePayments,
-                          headers: const ['Payment', 'Member', 'Contribution', 'Due', 'Paid', 'Remaining', 'Status', 'Approval', 'Date', 'Reference'],
-                          rows: _exportRows(payments, remainingById, currency, dateFmt),
-                          summary: _summaryEntries(strings, currency, totalDue, totalPaid, totalRemaining),
+                          data: _buildExportData(strings, payments, remainingById, currency, dateFmt, totalDue, totalPaid, totalRemaining),
                         )),
                   ),
                 ),

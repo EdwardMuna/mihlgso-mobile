@@ -99,20 +99,63 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
     }
   }
 
-  List<List<String>> _exportRows(List<MemberApplicationSummary> apps, DateFormat dateFmt) {
-    return apps
-        .map((a) => [
-              a.name,
-              a.email,
-              a.phone,
-              a.registrationType,
-              a.institution ?? '',
-              a.employmentStatus ?? '',
-              a.levelOfEducation ?? '',
-              a.status.name,
-              dateFmt.format(a.createdAt),
-            ])
-        .toList();
+  String _applicationStatusLabel(AppStrings strings, ApplicationStatus status) => switch (status) {
+        ApplicationStatus.approved => strings.approvedStatus,
+        ApplicationStatus.rejected => strings.rejectedStatus,
+        ApplicationStatus.pending => strings.pendingApproval,
+      };
+
+  // Mirrors the website's applicantExportText in
+  // app/[locale]/admin/applications/page.tsx: name, then "email · phone",
+  // then (members only) one "Label: value" line per filled-in detail field,
+  // then the application message in quotes if present — all one multi-line
+  // cell under the "Applicant" column.
+  String _applicantText(AppStrings strings, MemberApplicationSummary a) {
+    final lines = [a.name, '${a.email} · ${a.phone}'];
+    if (a.registrationType == 'MEMBER') {
+      final details = <String, String?>{
+        strings.institution: a.institution,
+        strings.graduatedYearLabel: a.graduatedYear?.toString(),
+        strings.postalAddress: a.postalAddress,
+        strings.currentResidential: a.currentResidential,
+        strings.employmentStatus: a.employmentStatus,
+        strings.levelOfEducation: a.levelOfEducation,
+        strings.gender: a.gender,
+        strings.academicDiscipline: a.academicDiscipline,
+        strings.employerOffice: a.employer,
+        strings.nationality: a.nationality,
+        strings.placeOfLiving: a.placeOfLiving,
+      };
+      for (final entry in details.entries) {
+        if (entry.value != null && entry.value!.isNotEmpty) {
+          lines.add('${entry.key}: ${entry.value}');
+        }
+      }
+    }
+    if ((a.message ?? '').isNotEmpty) lines.add('"${a.message}"');
+    return lines.join('\n');
+  }
+
+  // Mirrors the website's exportColumns/exportRows in
+  // app/[locale]/admin/applications/page.tsx: "#", Applicant (multi-line),
+  // Type, Submitted, Status — no per-field columns and no totals row
+  // (applications have no monetary amount to sum).
+  ExportData _buildExportData(AppStrings strings, List<MemberApplicationSummary> apps, DateFormat dateTimeFmt) {
+    final rows = <List<String>>[];
+    for (var i = 0; i < apps.length; i++) {
+      final a = apps[i];
+      rows.add([
+        '${i + 1}',
+        _applicantText(strings, a),
+        a.registrationType == 'MEMBER' ? strings.member : strings.stakeholder,
+        dateTimeFmt.format(a.createdAt),
+        _applicationStatusLabel(strings, a.status),
+      ]);
+    }
+    return ExportData(
+      headers: ['#', strings.applicant, strings.type, strings.submitted, strings.status],
+      rows: rows,
+    );
   }
 
   Future<void> _export(BuildContext context, Future<void> Function() run) async {
@@ -133,6 +176,7 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
     final strings = AppStrings.of(context);
     final applicationsAsync = ref.watch(adminApplicationsProvider);
     final dateFmt = DateFormat.yMMMd();
+    final dateTimeFmt = DateFormat('dd MMM y, HH:mm');
 
     return RefreshIndicator(
         onRefresh: () async => ref.invalidate(adminApplicationsProvider),
@@ -159,14 +203,12 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
                       onExcel: () => _export(context, () => ExportService.exportExcel(
                             filename: 'mihlgso_applications',
                             title: strings.exportedFileTitleApplications,
-                            headers: const ['Name', 'Email', 'Phone', 'Type', 'Institution', 'Employment', 'Education', 'Status', 'Submitted'],
-                            rows: _exportRows(apps, dateFmt),
+                            data: _buildExportData(strings, apps, dateTimeFmt),
                           )),
                       onPdf: () => _export(context, () => ExportService.exportPdf(
                             filename: 'mihlgso_applications',
                             title: strings.exportedFileTitleApplications,
-                            headers: const ['Name', 'Email', 'Phone', 'Type', 'Institution', 'Employment', 'Education', 'Status', 'Submitted'],
-                            rows: _exportRows(apps, dateFmt),
+                            data: _buildExportData(strings, apps, dateTimeFmt),
                           )),
                     ),
                   );
