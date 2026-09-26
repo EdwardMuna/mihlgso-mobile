@@ -168,12 +168,6 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
                             headers: const ['Name', 'Email', 'Phone', 'Type', 'Institution', 'Employment', 'Education', 'Status', 'Submitted'],
                             rows: _exportRows(apps, dateFmt),
                           )),
-                      onCsv: () => _export(context, () => ExportService.exportCsv(
-                            filename: 'mihlgso_applications',
-                            title: strings.exportedFileTitleApplications,
-                            headers: const ['Name', 'Email', 'Phone', 'Type', 'Institution', 'Employment', 'Education', 'Status', 'Submitted'],
-                            rows: _exportRows(apps, dateFmt),
-                          )),
                     ),
                   );
                 }

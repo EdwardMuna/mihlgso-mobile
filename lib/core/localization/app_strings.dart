@@ -240,7 +240,6 @@ class AppStrings {
     'applicationDetails': 'Application details',
     'exportExcelTooltip': 'Export to Excel',
     'exportPdfTooltip': 'Export to PDF',
-    'exportCsvTooltip': 'Export to CSV',
     'savedToDownloads': 'Saved to Downloads.',
     'exportedFileTitlePayments': 'MIHLGSO Payments',
     'exportedFileTitleDonations': 'MIHLGSO Donations',
@@ -658,7 +657,6 @@ class AppStrings {
     'applicationDetails': 'Maelezo ya Ombi',
     'exportExcelTooltip': 'Hamisha kwenda Excel',
     'exportPdfTooltip': 'Hamisha kwenda PDF',
-    'exportCsvTooltip': 'Hamisha kwenda CSV',
     'savedToDownloads': 'Imehifadhiwa kwenye Downloads.',
     'exportedFileTitlePayments': 'Malipo ya MIHLGSO',
     'exportedFileTitleDonations': 'Michango ya MIHLGSO',
@@ -1123,7 +1121,6 @@ class AppStrings {
   String get applicationDetails => _values['applicationDetails']!;
   String get exportExcelTooltip => _values['exportExcelTooltip']!;
   String get exportPdfTooltip => _values['exportPdfTooltip']!;
-  String get exportCsvTooltip => _values['exportCsvTooltip']!;
   String get savedToDownloads => _values['savedToDownloads']!;
   String get exportedFileTitlePayments => _values['exportedFileTitlePayments']!;
   String get exportedFileTitleDonations => _values['exportedFileTitleDonations']!;

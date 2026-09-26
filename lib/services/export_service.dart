@@ -1,4 +1,3 @@
-import 'package:csv/csv.dart';
 import 'package:excel/excel.dart' as xls;
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -20,8 +19,8 @@ class _Brand {
   static const white = 'FFFFFFFF';
 }
 
-/// Turns an admin list (Payments/Donations/Applications) into a branded CSV,
-/// Excel, or PDF file and saves it straight to the device's real Downloads
+/// Turns an admin list (Payments/Donations/Applications) into a branded
+/// Excel or PDF file and saves it straight to the device's real Downloads
 /// folder — no share sheet, no save-location picker — via a native platform
 /// channel (see android/.../MainActivity.kt: MediaStore.Downloads on
 /// Android 10+, direct file write on 9 and below).
@@ -40,26 +39,12 @@ class ExportService {
     });
   }
 
-  static Future<void> exportCsv({
-    required String filename,
-    required String title,
-    required List<String> headers,
-    required List<List<String>> rows,
-  }) async {
-    // CSV has no styling capability at all, but a leading "# <org> — <title>"
-    // comment line still marks the file as MIHLGSO's the moment it's opened,
-    // and spreadsheet apps skip lines starting with '#' when re-imported.
-    final generatedAt = DateFormat('d MMM yyyy, HH:mm').format(DateTime.now());
-    final csv = const ListToCsvConverter().convert([headers, ...rows]);
-    final withBanner = '# $_orgName — $title (generated $generatedAt)\n$csv';
-    await _saveToDownloads('$filename.csv', withBanner.codeUnits, 'text/csv');
-  }
-
   static Future<void> exportExcel({
     required String filename,
     required String title,
     required List<String> headers,
     required List<List<String>> rows,
+    List<MapEntry<String, String>> summary = const [],
   }) async {
     final workbook = xls.Excel.createExcel();
     final sheetName = workbook.getDefaultSheet()!;
@@ -77,6 +62,12 @@ class ExportService {
       fontSize: 9,
       fontColorHex: xls.ExcelColor.fromHexString(_Brand.white),
       backgroundColorHex: xls.ExcelColor.fromHexString(_Brand.primaryExcel),
+    );
+    final summaryStyle = xls.CellStyle(
+      bold: true,
+      fontSize: 10,
+      fontColorHex: xls.ExcelColor.fromHexString(_Brand.primaryExcel),
+      backgroundColorHex: xls.ExcelColor.fromHexString(_Brand.zebraExcel),
     );
     final headerStyle = xls.CellStyle(
       bold: true,
@@ -102,19 +93,34 @@ class ExportService {
     );
     sheet.cell(xls.CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 1)).cellStyle = subtitleStyle;
 
-    // Row 2: column headers.
+    // Row 2 (when present): summary totals, one merged row, e.g.
+    // "Total Due: TSh 50,000   |   Total Paid: TSh 30,000".
+    var nextRow = 2;
+    if (summary.isNotEmpty) {
+      final summaryText = summary.map((e) => '${e.key}: ${e.value}').join('   |   ');
+      sheet.appendRow([xls.TextCellValue(summaryText)]);
+      sheet.merge(
+        xls.CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: nextRow),
+        xls.CellIndex.indexByColumnRow(columnIndex: lastCol, rowIndex: nextRow),
+      );
+      sheet.cell(xls.CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: nextRow)).cellStyle = summaryStyle;
+      nextRow++;
+    }
+
+    // Column headers.
     sheet.appendRow(headers.map((h) => xls.TextCellValue(h)).toList());
     for (var c = 0; c <= lastCol; c++) {
-      sheet.cell(xls.CellIndex.indexByColumnRow(columnIndex: c, rowIndex: 2)).cellStyle = headerStyle;
+      sheet.cell(xls.CellIndex.indexByColumnRow(columnIndex: c, rowIndex: nextRow)).cellStyle = headerStyle;
       sheet.setColumnWidth(c, 20);
     }
+    final firstDataRow = nextRow + 1;
 
     // Data rows, zebra-striped for readability.
     for (var r = 0; r < rows.length; r++) {
       sheet.appendRow(rows[r].map((v) => xls.TextCellValue(v)).toList());
       if (r.isOdd) {
         for (var c = 0; c <= lastCol; c++) {
-          sheet.cell(xls.CellIndex.indexByColumnRow(columnIndex: c, rowIndex: r + 3)).cellStyle = zebraStyle;
+          sheet.cell(xls.CellIndex.indexByColumnRow(columnIndex: c, rowIndex: firstDataRow + r)).cellStyle = zebraStyle;
         }
       }
     }
@@ -133,6 +139,7 @@ class ExportService {
     required String title,
     required List<String> headers,
     required List<List<String>> rows,
+    List<MapEntry<String, String>> summary = const [],
   }) async {
     final logoBytes = await rootBundle.load('assets/images/logo.jpeg');
     final logo = pw.MemoryImage(logoBytes.buffer.asUint8List());
@@ -189,6 +196,34 @@ class ExportService {
           ],
         ),
         build: (context) => [
+          if (summary.isNotEmpty) ...[
+            pw.Row(
+              children: [
+                for (final entry in summary) ...[
+                  pw.Expanded(
+                    child: pw.Container(
+                      margin: const pw.EdgeInsets.only(right: 8),
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: pw.BoxDecoration(
+                        color: _Brand.zebra,
+                        border: pw.Border.all(color: _Brand.borderLight, width: 0.5),
+                        borderRadius: pw.BorderRadius.circular(4),
+                      ),
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(entry.key.toUpperCase(), style: pw.TextStyle(fontSize: 7, color: PdfColors.grey600, fontWeight: pw.FontWeight.bold)),
+                          pw.SizedBox(height: 2),
+                          pw.Text(entry.value, style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: _Brand.primary)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            pw.SizedBox(height: 12),
+          ],
           pw.TableHelper.fromTextArray(
             headers: headers,
             data: rows,

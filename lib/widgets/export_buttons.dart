@@ -3,22 +3,20 @@ import 'package:flutter/material.dart';
 import '../core/localization/app_strings.dart';
 import '../core/theme/app_theme.dart';
 
-/// Excel/PDF/CSV export buttons — shared by the admin Payments, Donations,
-/// and Applications screens. Each callback should export whatever the
-/// screen's currently *visible* (filtered) rows are, not the unfiltered list,
-/// and resolve once the file has actually been saved (so the chip's own
+/// Excel/PDF export buttons — shared by the admin Payments, Donations, and
+/// Applications screens. Each callback should export whatever the screen's
+/// currently *visible* (filtered) rows are, not the unfiltered list, and
+/// resolve once the file has actually been saved (so the chip's own
 /// loading/success animation reflects real completion, not just the tap).
 class ExportButtonsRow extends StatelessWidget {
   const ExportButtonsRow({
     super.key,
     required this.onExcel,
     required this.onPdf,
-    required this.onCsv,
   });
 
   final Future<void> Function() onExcel;
   final Future<void> Function() onPdf;
-  final Future<void> Function() onCsv;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +27,6 @@ class ExportButtonsRow extends StatelessWidget {
       children: [
         _ExportChip(label: 'Excel', tooltip: strings.exportExcelTooltip, icon: Icons.grid_on, color: const Color(0xFF1D6F42), onPressed: onExcel),
         _ExportChip(label: 'PDF', tooltip: strings.exportPdfTooltip, icon: Icons.picture_as_pdf_outlined, color: const Color(0xFFD32F2F), onPressed: onPdf),
-        _ExportChip(label: 'CSV', tooltip: strings.exportCsvTooltip, icon: Icons.description_outlined, color: const Color(0xFF0E5A8A), onPressed: onCsv),
       ],
     );
   }

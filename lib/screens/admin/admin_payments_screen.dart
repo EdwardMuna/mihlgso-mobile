@@ -193,6 +193,20 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
         .toList();
   }
 
+  List<MapEntry<String, String>> _summaryEntries(
+    AppStrings strings,
+    NumberFormat currency,
+    double totalDue,
+    double totalPaid,
+    double totalRemaining,
+  ) {
+    return [
+      MapEntry(strings.totalDue, currency.format(totalDue)),
+      MapEntry(strings.totalPaid, currency.format(totalPaid)),
+      MapEntry(strings.totalRemainingPrefix, currency.format(totalRemaining)),
+    ];
+  }
+
   Future<void> _export(
     BuildContext context,
     Future<void> Function() run,
@@ -251,18 +265,14 @@ class _AdminPaymentsScreenState extends ConsumerState<AdminPaymentsScreen> {
                           title: strings.exportedFileTitlePayments,
                           headers: const ['Payment', 'Member', 'Contribution', 'Due', 'Paid', 'Remaining', 'Status', 'Approval', 'Date', 'Reference'],
                           rows: _exportRows(payments, remainingById, currency, dateFmt),
+                          summary: _summaryEntries(strings, currency, totalDue, totalPaid, totalRemaining),
                         )),
                     onPdf: () => _export(context, () => ExportService.exportPdf(
                           filename: 'mihlgso_payments',
                           title: strings.exportedFileTitlePayments,
                           headers: const ['Payment', 'Member', 'Contribution', 'Due', 'Paid', 'Remaining', 'Status', 'Approval', 'Date', 'Reference'],
                           rows: _exportRows(payments, remainingById, currency, dateFmt),
-                        )),
-                    onCsv: () => _export(context, () => ExportService.exportCsv(
-                          filename: 'mihlgso_payments',
-                          title: strings.exportedFileTitlePayments,
-                          headers: const ['Payment', 'Member', 'Contribution', 'Due', 'Paid', 'Remaining', 'Status', 'Approval', 'Date', 'Reference'],
-                          rows: _exportRows(payments, remainingById, currency, dateFmt),
+                          summary: _summaryEntries(strings, currency, totalDue, totalPaid, totalRemaining),
                         )),
                   ),
                 ),
