@@ -7,6 +7,11 @@
   release build is ever distributed.
 -->
 <network-security-config>
+    <!-- Everything not explicitly listed below requires HTTPS — this is
+         what actually protects the production API, since the manifest's
+         usesCleartextTraffic flag only sets this default when no
+         base-config is present. -->
+    <base-config cleartextTrafficPermitted="false" />
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">192.168.0.48</domain>
         <domain includeSubdomains="false">10.0.2.2</domain>
